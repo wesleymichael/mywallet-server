@@ -10,3 +10,13 @@ export async function createTransaction(req, res){
         res.status(500).send(error.message);
     }
 }
+
+export async function getTransaction(req, res){
+    try{
+        const session = res.locals.session;
+        const transactions = await db.collection('transactions').find({userId: session.userId}).toArray();
+        res.send(transactions);
+    } catch(error){
+        res.status(500).send(error.message);
+    }
+}
