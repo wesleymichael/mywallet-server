@@ -34,3 +34,24 @@ export async function deleteTransaction(req, res){
         res.status(500).send(error.message);
     }
 }
+
+export async function editTransactionsById(req, res){
+    const { id } = req.params;
+
+    try{
+        const transaction = await db.collection('transactions').findOne({_id: new ObjectId(id)});
+        if(!transaction) return res.sendStatus(404);
+
+        const session = res.locals.session;
+        console.log(transaction.userId.equals(session.userId))
+        if(!transaction.userId.equals(session.userId)) return res.sendStatus(401);
+
+        await db.collection('transactions').updateOne(
+            {_id: new ObjectId(id)},
+            { $set: {...req.body, value: Number(req.body.value), userId: session.userId, date: dayjs().format()}}
+        )
+        res.send("Atualizado com sucesso!");
+    } catch (error){
+        res.status(500).send(error.message);
+    }
+}
